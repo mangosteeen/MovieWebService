@@ -26,7 +26,6 @@ app.listen(port, () => {
     console.log("Server is running on port ", port);
 });
 
-// Example Route: Get all cards
 app.get('/allmovies', async (req, res) => {
     try {
         let connection = await mysql.createConnection(dbConfig);
@@ -38,7 +37,6 @@ app.get('/allmovies', async (req, res) => {
     }
 });
 
-// Example Route: Create a new card
 app.post('/addmovie', async (req, res) => {
     const { movie_title, movie_url } = req.body;
     try {
