@@ -48,3 +48,32 @@ app.post('/addmovie', async (req, res) => {
         res.status(500).json({ message: 'Server error - could not add movie ' + movie_title });
     }
 });
+
+app.put('/editmovie/:id', async (req, res) => {
+    const { id } = req.params;
+    const { movie_title, movie_url } = req.body;
+
+    if (movie_title === undefined && movie_url === undefined) {
+        return res.status(400).json({ message: 'No information to update' });
+    }
+
+    try {
+        let connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            `UPDATE defaultdb.movies 
+             SET movie_title = COALESCE(?, movie_title),
+                 movie_url = COALESCE(?, movie_url)
+             WHERE id = ?`,
+            [movie_title ?? null, movie_url ?? null, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Movie not found' });
+        }
+
+        res.json({ message: 'Movie id ' + id + ' updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error - could not update movie id ' + id });
+    }
+});
