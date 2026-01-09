@@ -39,13 +39,9 @@ app.get('/allmovies', async (req, res) => {
 
 app.post('/addmovie', async (req, res) => {
     const { movie_title, movie_url } = req.body;
-
     try {
         let connection = await mysql.createConnection(dbConfig);
-        await connection.execute(
-            'INSERT INTO defaultdb.movies (movie_title, movie_url) VALUES (?, ?)',
-            [movie_title, movie_url]
-        );
+        await connection.execute('INSERT INTO movies (movie_title, movie_url) VALUES (?, ?)', [movie_title, movie_url]);
         res.status(201).json({ message: 'Movie ' + movie_title + ' added successfully' });
     } catch (err) {
         console.error(err);
@@ -79,5 +75,26 @@ app.put('/editmovie/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error - could not update movie id ' + id });
+    }
+});
+
+app.delete('/deletemovie/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        let connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'DELETE FROM defaultdb.movies WHERE id = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Movie not found' });
+        }
+
+        res.json({ message: 'Movie id ' + id + ' deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error - could not delete movie id ' + id });
     }
 });
